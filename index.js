@@ -12,11 +12,11 @@ console.log(
 
 //Installing Package
 const installPackage = () => {
-  const rl = readline.createInterface({
+  const rl1 = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
-  rl.question("Name of package? \n", function (name) {
+  rl1.question("Name of package? \n", function (name) {
     console.log(`Installing package ${name}`);
     exec(`npm install ${name}`, (error, stdout, stderr) => {
       if (error) {
@@ -28,17 +28,17 @@ const installPackage = () => {
         run();
       }
     });
-    rl.close();
+    rl1.close();
   });
 };
 
 //Unsintalling Package
 const uninstallPackage = () => {
-  const rl = readline.createInterface({
+  const rl2 = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
-  rl.question("Name of package? \n", function (name) {
+  rl2.question("Name of package? \n", function (name) {
     console.log(`Unsintalling package ${name}`);
     exec(`npm uninstall ${name}`, (error, stdout, stderr) => {
       if (error) {
@@ -50,7 +50,7 @@ const uninstallPackage = () => {
         run();
       }
     });
-    rl.close();
+    rl2.close();
   });
 };
 
@@ -74,7 +74,7 @@ const updateAllPackage = (x) => {
   console.log(`Updating all package`);
   let updated = [];
   const deleteFile = function (xes, callbacks) {
-    console.log(`npm update ${xes.split(" ")[1].toLowerCase()}`);
+    console.log(`Updating ${xes.split(" ")[1].toLowerCase()}`);
     exec(
       `npm update ${xes.split(" ")[1].toLowerCase()}`,
       (error, stdout, stderr) => {
@@ -83,11 +83,14 @@ const updateAllPackage = (x) => {
           return;
         }
         if (stderr) {
-          console.log(`Error: ${stderr}`);
+          // console.log(`Error: ${xes.split(" ")[1].toLowerCase()} ${stderr} `);
           return;
         }
         updated.push(true);
-        updated.length == x.length - 3 && run();
+        if (updated.length == x.length - 3) {
+          console.log("All packages updated successfully");
+          run();
+        }
       }
     );
   };
@@ -99,16 +102,53 @@ const updateAllPackage = (x) => {
 //Update Certain Package
 const updateCertainPackage = (pkg) => {
   const pkgName = pkg.split(" ")[1].toLowerCase();
-  console.log(`Uninstalling package ${pkgName}`);
-  console.log(`npm update ${pkgName}`);
+  console.log(`Updating package ${pkgName}`);
   exec(`npm update ${pkgName}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`exec error: ${error}`);
       return;
     }
-    if (!error) {
+    if (stdout) {
       console.log(`Updated ${pkgName}`);
       run();
+    }
+  });
+};
+//Rollback Package
+const rollbackPackage = (pkg) => {
+  const pkgName = pkg.split(" ")[1].toLowerCase();
+  console.log(`Rollback to version of ${pkgName}: `);
+  exec(`npm view ${pkgName} versions  --json`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      return;
+    }
+    if (stdout) {
+      var stdou = null;
+      stdou = JSON.parse(stdout).reverse();
+      inquirer
+        .prompt({
+          type: "rawlist",
+          name: "version",
+          message: "Select version you wanna rollback",
+          choices: [...stdou],
+          filter(val) {
+            return val;
+          },
+        })
+        .then((answer) => {
+          exec(
+            `npm install ${pkgName}@${answer.version}`,
+            (error, stdout, stderr) => {
+              if (error) {
+                console.error(`exec error: ${error}`);
+                return;
+              }
+              console.log(stdout);
+              run();
+            }
+          );
+        });
     }
   });
 };
@@ -135,18 +175,15 @@ const run = () => {
     .then((answer) => {
       if (answer.option == "Install package") {
         installPackage();
-        exec("npm start");
       } else if (answer.option == "Uninstall package") {
         uninstallPackage();
-        exec("npm start");
       } else if (answer.option == "Update all package") {
         updateAllPackage(x);
-        exec("npm start");
       } else {
         const selected = answer.option;
         inquirer
           .prompt({
-            type: "rawlist",
+            type: "list",
             name: "options",
             message: "What do want to do?:",
             choices: [
@@ -162,13 +199,10 @@ const run = () => {
           .then((answer) => {
             if (answer.options == "Uninstall") {
               uninstallCertainPackage(selected);
-              exec("npm start");
             } else if (answer.options == "Update") {
               updateCertainPackage(selected);
-              exec("npm start");
             } else if (answer.options == "Rollback to previous version") {
-              uninstallPackage();
-              exec("npm start");
+              rollbackPackage(selected);
             } else {
               run();
             }
