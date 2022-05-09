@@ -160,7 +160,15 @@ const run = () => {
 
   const x = ["Install package", "Uninstall package", "Update all package"];
   Object.keys(packages).map((v, i) => {
-    x.push(i + 1 + ") " + v.charAt(0).toUpperCase() + v.slice(1));
+    x.push(
+      i +
+        1 +
+        ") " +
+        v.charAt(0).toUpperCase() +
+        v.slice(1) +
+        " " +
+        chalk.green("(" + packages[v].replace("^", "") + ")")
+    );
   });
 
   inquirer
