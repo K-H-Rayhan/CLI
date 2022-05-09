@@ -4,6 +4,7 @@ import { exec } from "child_process";
 import fs from "fs";
 import inquirer from "inquirer";
 import readline from "readline";
+import async from "async";
 ("use strict");
 console.log(
   chalk.blue(figlet.textSync("RAY'S CLI", { horizontalLayout: "full" }))
@@ -69,17 +70,29 @@ const uninstallCertainPackage = (pkg) => {
   });
 };
 //Update All Package
-const updateAllPackage = () => {
-  console.log(`Uninstalling package ${pkgName}`);
-  exec(`npm uninstall ${pkgName}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`exec error: ${error}`);
-      return;
-    }
-    if (stdout) {
-      console.log(stdout);
-      run();
-    }
+const updateAllPackage = (x) => {
+  console.log(`Updating all package`);
+  let updated = [];
+  const deleteFile = function (xes, callbacks) {
+    console.log(`npm update ${xes.split(" ")[1].toLowerCase()}`);
+    exec(
+      `npm update ${xes.split(" ")[1].toLowerCase()}`,
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
+          return;
+        }
+        if (stderr) {
+          console.log(`Error: ${stderr}`);
+          return;
+        }
+        updated.push(true);
+        updated.length == x.length - 3 && run();
+      }
+    );
+  };
+  async.each(x.slice(3, x.length), deleteFile).catch((err) => {
+    console.log(err);
   });
 };
 
@@ -127,7 +140,7 @@ const run = () => {
         uninstallPackage();
         exec("npm start");
       } else if (answer.option == "Update all package") {
-        updateAllPackage();
+        updateAllPackage(x);
         exec("npm start");
       } else {
         const selected = answer.option;
@@ -157,7 +170,7 @@ const run = () => {
               uninstallPackage();
               exec("npm start");
             } else {
-              run()
+              run();
             }
           });
       }
