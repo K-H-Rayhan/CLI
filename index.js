@@ -8,13 +8,6 @@ import readline from "readline";
 console.log(
   chalk.blue(figlet.textSync("RAY'S CLI", { horizontalLayout: "full" }))
 );
-let packageData = fs.readFileSync("package.json");
-let packages = JSON.parse(packageData).dependencies;
-
-const x = ["Install package", "Uninstall package", "Update all package"];
-Object.keys(packages).map((v, i) => {
-  x.push(i + 1 + ") " + v.charAt(0).toUpperCase() + v.slice(1));
-});
 
 //Installing Package
 const installPackage = () => {
@@ -22,7 +15,7 @@ const installPackage = () => {
     input: process.stdin,
     output: process.stdout,
   });
-  rl.question("Name of package? (Eg:react angular) \n", function (name) {
+  rl.question("Name of package? \n", function (name) {
     console.log(`Installing package ${name}`);
     exec(`npm install ${name}`, (error, stdout, stderr) => {
       if (error) {
@@ -31,21 +24,21 @@ const installPackage = () => {
       }
       if (stdout) {
         console.log(stdout);
-        rl.close();
         run();
       }
     });
+    rl.close();
   });
 };
 
-//Installing Package
+//Unsintalling Package
 const uninstallPackage = () => {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
-  rl.question("Name of package?", function (name) {
-    console.log(`Uninstalling package ${name}`);
+  rl.question("Name of package? \n", function (name) {
+    console.log(`Unsintalling package ${name}`);
     exec(`npm uninstall ${name}`, (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
@@ -53,10 +46,10 @@ const uninstallPackage = () => {
       }
       if (stdout) {
         console.log(stdout);
-        rl.close();
         run();
       }
     });
+    rl.close();
   });
 };
 
@@ -76,8 +69,7 @@ const uninstallCertainPackage = (pkg) => {
   });
 };
 //Update All Package
-const updateAllPackage = (pkg) => {
-  const pkgName = pkg.split(" ")[1].toLowerCase();
+const updateAllPackage = () => {
   console.log(`Uninstalling package ${pkgName}`);
   exec(`npm uninstall ${pkgName}`, (error, stdout, stderr) => {
     if (error) {
@@ -109,6 +101,14 @@ const updateCertainPackage = (pkg) => {
 };
 
 const run = () => {
+  let packageData = fs.readFileSync("package.json");
+  let packages = JSON.parse(packageData).dependencies;
+
+  const x = ["Install package", "Uninstall package", "Update all package"];
+  Object.keys(packages).map((v, i) => {
+    x.push(i + 1 + ") " + v.charAt(0).toUpperCase() + v.slice(1));
+  });
+
   inquirer
     .prompt({
       type: "list",
