@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import chalk from "chalk";
 import figlet from "figlet";
 import { exec } from "child_process";
@@ -7,7 +8,7 @@ import readline from "readline";
 import async from "async";
 ("use strict");
 console.log(
-  chalk.blue(figlet.textSync("RAY'S CLI", { horizontalLayout: "full" }))
+  chalk.blue(figlet.textSync("Rayhan's CLI", { horizontalLayout: "full" }))
 );
 
 //Installing Package
