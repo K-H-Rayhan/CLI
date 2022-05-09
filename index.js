@@ -157,6 +157,7 @@ const run = () => {
               uninstallPackage();
               exec("npm start");
             } else {
+              run()
             }
           });
       }

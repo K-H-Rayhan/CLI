@@ -11,6 +11,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "async": "^3.2.3",
     "chalk": "^5.0.1",
     "clear": "^0.1.0",
     "figlet": "^1.5.2",
