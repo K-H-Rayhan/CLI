@@ -153,70 +153,117 @@ const rollbackPackage = (pkg) => {
     }
   });
 };
-
-const run = () => {
-  let packageData = fs.readFileSync("package.json");
-  let packages = JSON.parse(packageData).dependencies;
-
-  const x = ["Install package", "Uninstall package", "Update all package"];
-  Object.keys(packages).map((v, i) => {
-    x.push(
-      i +
-        1 +
-        ") " +
-        v.charAt(0).toUpperCase() +
-        v.slice(1) +
-        " " +
-        chalk.green("(" + packages[v].replace("^", "") + ")")
-    );
+// Create App
+const createApp = (pkg) => {
+  const rl3 = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
   });
-
-  inquirer
-    .prompt({
-      type: "list",
-      name: "option",
-      message: "Choose:",
-      choices: [...x],
-      filter(val) {
-        return val;
-      },
-    })
-    .then((answer) => {
-      if (answer.option == "Install package") {
-        installPackage();
-      } else if (answer.option == "Uninstall package") {
-        uninstallPackage();
-      } else if (answer.option == "Update all package") {
-        updateAllPackage(x);
-      } else {
-        const selected = answer.option;
-        inquirer
-          .prompt({
-            type: "list",
-            name: "options",
-            message: "What do want to do?:",
-            choices: [
-              "Uninstall",
-              "Update",
-              "Rollback to previous version",
-              "Go Back",
-            ],
-            filter(val) {
-              return val;
-            },
-          })
-          .then((answer) => {
-            if (answer.options == "Uninstall") {
-              uninstallCertainPackage(selected);
-            } else if (answer.options == "Update") {
-              updateCertainPackage(selected);
-            } else if (answer.options == "Rollback to previous version") {
-              rollbackPackage(selected);
-            } else {
-              run();
-            }
-          });
+  rl3.question("Name of your app? \n", function (name) {
+    console.log(`Initializing app ${name.replace(" ", "")}`);
+    exec(`${pkg} ${name.replace(" ", "")}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        return;
+      }
+      if (stderr) {
+        console.log(stderr);
+      }
+      if (stdout) {
+        console.log(stdout);
       }
     });
+    rl3.close();
+  });
+};
+const run = () => {
+  try {
+    let packageData = fs.readFileSync("package.json");
+    let packages = JSON.parse(packageData).dependencies;
+    const x = ["Install package", "Uninstall package", "Update all package"];
+    Object.keys(packages).map((v, i) => {
+      x.push(
+        i +
+          1 +
+          ") " +
+          v.charAt(0).toUpperCase() +
+          v.slice(1) +
+          " " +
+          chalk.green("(" + packages[v].replace("^", "") + ")")
+      );
+    });
+
+    inquirer
+      .prompt({
+        type: "list",
+        name: "option",
+        message: "Choose:",
+        choices: [...x],
+        filter(val) {
+          return val;
+        },
+      })
+      .then((answer) => {
+        if (answer.option == "Install package") {
+          installPackage();
+        } else if (answer.option == "Uninstall package") {
+          uninstallPackage();
+        } else if (answer.option == "Update all package") {
+          updateAllPackage(x);
+        } else {
+          const selected = answer.option;
+          inquirer
+            .prompt({
+              type: "list",
+              name: "options",
+              message: "What do want to do?:",
+              choices: [
+                "Uninstall",
+                "Update",
+                "Rollback to previous version",
+                "Go Back",
+              ],
+              filter(val) {
+                return val;
+              },
+            })
+            .then((answer) => {
+              if (answer.options == "Uninstall") {
+                uninstallCertainPackage(selected);
+              } else if (answer.options == "Update") {
+                updateCertainPackage(selected);
+              } else if (answer.options == "Rollback to previous version") {
+                rollbackPackage(selected);
+              } else {
+                run();
+              }
+            });
+        }
+      });
+  } catch (e) {
+    inquirer
+      .prompt({
+        type: "list",
+        name: "option",
+        message: "Choose:",
+        choices: [
+          "Create React App",
+          "Create Next App",
+          "Create Next Typescript App",
+        ],
+        filter(val) {
+          return val;
+        },
+      })
+      .then((answer) => {
+        if (answer.option == "Create React App") {
+          createApp("npx create-react-app");
+        } else if (answer.option == "Create Next App") {
+          createApp("npx create-next-app@latest");
+        } else if (answer.option == "Create Next Typescript") {
+          createApp("npx create-next-app@latest --typescript");
+        }
+      });
+  }
 };
 run();

@@ -1,5 +1,5 @@
 {
-  "name": "raycli",
+  "name": "asd",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -18,6 +18,6 @@
     "inquirer": "^8.2.4"
   },
   "bin": {
-    "raycli": "./index.js"
+    "asd": "./index.js"
   }
 }
